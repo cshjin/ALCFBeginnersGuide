@@ -14,6 +14,16 @@ In addition, the baseline feature of this tool allows users to compare results w
 * Viewing results produced on Polaris on your local machine
 
 
+> **Note (updated 2026-07):** The terminal captures below are illustrative snapshots
+> and show pinned module versions (e.g. `nvhpc/23.9`, `PrgEnv-nvhpc/8.5.0`,
+> `cudatoolkit-standalone/12.5.0`) and tool versions that have since advanced.
+> In particular, the NVHPC modules (`PrgEnv-nvhpc`, `nvhpc`) were removed in CPE 24.11
+> and replaced by the NVIDIA modules (`PrgEnv-nvidia`, `nvidia`); load
+> `cudatoolkit-standalone` without a version to get the current default. When you run
+> the commands, expect newer version strings and a slightly different module list than
+> what is shown here. Verified against
+> <https://docs.alcf.anl.gov/polaris/compiling-and-linking/> (2026-07).
+
 ## Step-by-step guide
 
 ### Common part on Polaris

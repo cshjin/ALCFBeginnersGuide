@@ -99,7 +99,9 @@ Click the `Add` icon on the `Configure Remote Connections` screen:
 <img src="media/02_a_Linaro_Client_03.png" alt="Linaro_Client_Configuration_03" width="500"/>
 
 
-Add `Aurora` to `Connection Name`, `<your_user_id>@login.aurora.alcf.anl.gov` to `Host Name`, and `/opt/aurora/24.180.3/support/tools/forge/24.1.1` to `Remote Installation Directory`, and then click `Test Remote Launch` icon to test the configuration.
+Add `Aurora` to `Connection Name`, `<your_user_id>@login.aurora.alcf.anl.gov` to `Host Name`, and the Forge/DDT installation directory to `Remote Installation Directory`, and then click `Test Remote Launch` icon to test the configuration.
+
+> **Note (updated 2026-07):** the `Remote Installation Directory` path is version-specific and changes as the tool is updated (it was `/opt/aurora/24.180.3/support/tools/forge/24.1.1` when this guide was written). Find the current path on Aurora by running `module load forge` and then `which ddt` (the installation directory is the parent of the `bin/` that contains it). Verified against <https://docs.alcf.anl.gov/aurora/debugging/ddt-aurora/> (2026-07).
 
 ![Linaro_Client_Configuration_04](media/02_a_Linaro_Client_04.png)
 ![Linaro_Client_Configuration_05](media/02_a_Linaro_Client_05.png)

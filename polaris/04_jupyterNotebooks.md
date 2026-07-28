@@ -50,12 +50,24 @@ python3 -m ipykernel install \
     --env CONDA_PREFIX "${CONDA_PREFIX}"
 ```
 
-This will create a `kernel.json` file in `~/.local/share/jupyter/kernels/<kernel-name>/`. Here is an example for the default `conda` environment:
+This will create a `kernel.json` file in `~/.local/share/jupyter/kernels/<kernel-name>/`. Here is an example for the default `conda` environment.
 
+> **Note (updated 2026-07):** The paths below are captured from one specific,
+> now-outdated environment. In particular the conda build date (`2024-04-29`), the
+> pinned CUDA/NCCL/cuDNN/TensorRT versions, and the `/home/parton/.vscode-server/...`
+> entry are all machine- and user-specific. Because the command above generates this
+> file automatically from **your** active environment, the exact `python3` path, conda
+> build date, library versions, and `CONDA_PREFIX` on your system will differ. Treat this
+> as an illustration of the file's shape, not values to copy verbatim.
+
+<!-- OUTDATED (2026-07): the original example hardcoded conda build 2024-04-29, pinned
+     CUDA 12.4.1 / NCCL / cuDNN / TensorRT paths, and a personal .vscode-server path
+     (/home/parton/...). Kept below for reference; the note above explains why these
+     values should not be copied. -->
 ```json
 {
  "argv": [
-  "/soft/applications/conda/2024-04-29/mconda3/bin/python3",
+  "/soft/applications/conda/<conda-build-date>/mconda3/bin/python3",
   "-Xfrozen_modules=off",
   "-m",
   "ipykernel_launcher",
@@ -68,10 +80,10 @@ This will create a `kernel.json` file in `~/.local/share/jupyter/kernels/<kernel
   "debugger": true
  },
  "env": {
-  "PATH": "/soft/applications/conda/2024-04-29/mconda3/bin:/soft/applications/conda/2024-04-29/mconda3/condabin:/soft/compilers/cudatoolkit/cuda-12.4.1/bin:/soft/libraries/nccl/nccl_2.21.5-1+cuda12.4_x86_64/include:/opt/cray/pe/hdf5-parallel/1.12.2.9/bin:/opt/cray/pe/hdf5/1.12.2.9/bin:/opt/cray/pals/1.3.4/bin:/opt/cray/pe/mpich/8.1.28/ofi/gnu/12.3/bin:/opt/cray/pe/mpich/8.1.28/bin:/opt/cray/pe/craype/2.7.30/bin:/home/parton/.vscode-server/cli/servers/Stable-ea1445cc7016315d0f5728f8e8b12a45dc0a7286/server/bin/remote-cli:/soft/perftools/darshan/darshan-3.4.4/bin:/opt/cray/pe/perftools/23.12.0/bin:/opt/cray/pe/papi/7.0.1.2/bin:/opt/cray/libfabric/1.15.2.0/bin:/opt/clmgr/sbin:/opt/clmgr/bin:/opt/sgi/sbin:/opt/sgi/bin:/home/parton/.local/bin:/usr/local/bin:/usr/bin:/bin:/opt/c3/bin:/dbhome/db2cat/sqllib/bin:/dbhome/db2cat/sqllib/adm:/dbhome/db2cat/sqllib/misc:/dbhome/db2cat/sqllib/gskit/bin:/usr/lib/mit/bin:/usr/lib/mit/sbin:/opt/pbs/bin:/sbin:/opt/cray/pe/bin",
-  "LD_LIBRARY_PATH": "/soft/compilers/cudatoolkit/cuda-12.4.1/extras/CUPTI/lib64:/soft/compilers/cudatoolkit/cuda-12.4.1/lib64:/soft/libraries/trt/TensorRT-8.6.1.6.Linux.x86_64-gnu.cuda-12.0/lib:/soft/libraries/nccl/nccl_2.21.5-1+cuda12.4_x86_64/lib:/soft/libraries/cudnn/cudnn-cuda12-linux-x64-v9.1.0.70/lib:/soft/perftools/darshan/darshan-3.4.4/lib:/opt/cray/pe/papi/7.0.1.2/lib64:/opt/cray/libfabric/1.15.2.0/lib64:/dbhome/db2cat/sqllib/lib64:/dbhome/db2cat/sqllib/lib64/gskit:/dbhome/db2cat/sqllib/lib32",
+  "PATH": "<...generated from your active environment; includes your conda bin, the CUDA toolkit bin, Cray PE dirs, and your ~/.local/bin...>",
+  "LD_LIBRARY_PATH": "<...generated from your active environment; includes CUDA/CUPTI, NCCL, cuDNN, and other library dirs...>",
   "MPICH_GPU_SUPPORT_ENABLED": "1",
-  "CONDA_PREFIX": "/soft/applications/conda/2024-04-29/mconda3"
+  "CONDA_PREFIX": "/soft/applications/conda/<conda-build-date>/mconda3"
  }
 ```
 

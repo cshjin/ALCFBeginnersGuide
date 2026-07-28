@@ -32,7 +32,7 @@ The command `module show frameworks_optimized` lists the complete list of settin
 
 ### ⌨️   Hands on
 
-Here we show how to run the data parallel training example [`pytorch_ddp.py`](examples/04_AI_frameworks/pytorch_ddp.py`) described in [04_AI_frameworks.md](04_AI_frameworks.md) using the optimized setup of the `frameworks_optimized` module. 
+Here we show how to run the data parallel training example [`pytorch_ddp.py`](examples/04_AI_frameworks/pytorch_ddp.py) described in [04_AI_frameworks.md](04_AI_frameworks.md) using the optimized setup of the `frameworks_optimized` module. 
 
 The last two steps of the [hands-on example in 04_AI_frameworks.md](04_AI_frameworks.md#example%3A-training-a-pytorch-model-on-a-single-gpu-tile) should be replaced with the following ones:
 
@@ -41,6 +41,11 @@ The last two steps of the [hands-on example in 04_AI_frameworks.md](04_AI_framew
    module use /soft/datascience/frameworks_optimized/
    module load frameworks_optimized
    ```
+   > **Note (2026-07, verify on system):** This `frameworks_optimized` module path could not be
+   > confirmed in the current ALCF user-guides, where oneCCL tuning guidance now lives under the
+   > [oneCCL on Aurora](https://docs.alcf.anl.gov/aurora/data-science/frameworks/oneCCL/) page. If
+   > `module load frameworks_optimized` does not resolve, consult that page for the current set of
+   > recommended oneCCL environment-variable settings and apply them directly.
 1. Run the script on 24 tiles, 12 per node:
    ```bash
    mpiexec -n 24 -ppn 12 --cpu-bind=${CPU_BIND} python pytorch_ddp.py
@@ -81,7 +86,7 @@ Here we show how to use Copper on Aurora to import `torch` from a user-defined c
    ```bash
    ssh <username>@aurora.alcf.anl.gov
    ```
-1. Submit the script [`simple_with_copper.sh`](examples/copper_example/simple_with_copper.sh) from the directory `ALCFBeginnersGuide/Aurora-Getting-Started/aurora/examples/copper_example/` of this repository:
+1. Submit the script [`simple_with_copper.sh`](examples/copper_example/simple_with_copper.sh) from the directory `ALCFBeginnersGuide/aurora/examples/copper_example/` of this repository:
    ```bash
    qsub simple_with_copper.sh
    ```
@@ -94,6 +99,11 @@ Here we show how to use Copper on Aurora to import `torch` from a user-defined c
    module load copper
    launch_copper.sh
    ```
+   > **Note (updated 2026-07):** Copper should be stopped at the end of your job with the
+   > companion script `stop_copper.sh` (mirroring `launch_copper.sh`). Current Copper usage
+   > mounts the cooperative cache under `/tmp/${USER}/copper_mount`. See the current
+   > [Copper documentation](https://docs.alcf.anl.gov/aurora/data-management/copper/copper/)
+   > for the exact `launch_copper.sh` / `stop_copper.sh` options and mount path.
 
 1. If you have a local conda environment located at `LUS_CONDA_PATH=/lus/flare/projects/alcf_training/softwares/copper-lus-pip-custom-package`, and you want to use Copper, you need to: 
    - Add `/tmp/${USER}/copper/` to the beginning of the path to your conda environment:

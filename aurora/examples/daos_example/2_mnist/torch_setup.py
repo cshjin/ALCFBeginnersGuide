@@ -50,15 +50,20 @@ def init_distributed(backend=None):
     """
 
     if backend==None:
-        gpu = get_device_type()    
+        gpu = get_device_type()
 
         if gpu == "xpu":
-            backend = "ccl"
+            # NOTE (updated 2026-07): on the current Aurora `frameworks` module
+            # (frameworks/2025.3.1+) the distributed backend for Intel XPUs is "xccl".
+            # Older modules used "ccl" with `import oneccl_bindings_for_pytorch`, which has
+            # been removed. See https://docs.alcf.anl.gov/aurora/data-science/frameworks/pytorch/
+            backend = "xccl"
         elif gpu == "cuda":
             backend = "nccl"
         else:
             backend = "mpi"
     if backend == "ccl":
+        # legacy path for older frameworks modules that still provide oneCCL bindings
         import intel_extension_for_pytorch
         import oneccl_bindings_for_pytorch
     os.environ['LOCAL_RANK'] = os.environ["PALS_LOCAL_RANKID"]

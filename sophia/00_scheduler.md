@@ -1,10 +1,11 @@
-# Using the Aurora Job Scheduler: PBS
+# Using the Sophia Job Scheduler: PBS
 
-<!-- OUTDATED (2026-07): the PBS docs link pointed at a retired URL.
-     Current running-jobs docs: https://docs.alcf.anl.gov/aurora/running-jobs-aurora/ (2026-07).
-Aurora uses the PBS scheduler similar to other ALCF systems, such as Polaris. Here is our documentation for general use of [PBS](https://docs.alcf.anl.gov/running-jobs/job-and-queue-scheduling/). PBS is a third party product that comes with [extensive documentation](https://help.altair.com/2022.1.0/PBS%20Professional/PBSUserGuide2022.1.pdf). This is an introduction, not an extensive tutorial so we will only cover some basics.
--->
-Aurora uses the PBS scheduler similar to other ALCF systems, such as Polaris. Here is our documentation for [running jobs on Aurora](https://docs.alcf.anl.gov/aurora/running-jobs-aurora/). PBS is a third party product that comes with [extensive documentation](https://help.altair.com/2022.1.0/PBS%20Professional/PBSUserGuide2022.1.pdf). This is an introduction, not an extensive tutorial so we will only cover some basics.
+Sophia, like the other current ALCF systems (Polaris, Aurora, Crux), uses the PBS scheduler.
+Here is our documentation for [running jobs on Sophia](https://docs.alcf.anl.gov/sophia/running-jobs/).
+PBS is a third party product that comes with [extensive documentation](https://help.altair.com/2022.1.0/PBS%20Professional/PBSUserGuide2022.1.pdf).
+This is an introduction, not an extensive tutorial so we will only cover some basics.
+
+> **Note:** Sophia was re-platformed from ThetaGPU. Older ALCF pages and training material may show the **Cobalt** scheduler (e.g. `qsub -n 1 -t 30 -q full-node`, `module load cobalt/cobalt-gpu`). Those commands do **not** work on Sophia — use the PBS commands shown here.
 
 ### User is assumed to know:
 * schedulers are used to execute tasks on a cluster/supercomputer
@@ -18,30 +19,43 @@ Aurora uses the PBS scheduler similar to other ALCF systems, such as Polaris. He
 
 ## What is a scheduler
 
-A _scheduler_ is used to fairly run applications on a large number of computers that are shared by many users. The user installs their software and data in a space accessible by the worker nodes, then creates a script (BASH or otherwise) that goes through the motions of running the application. Based on the user's needs, they submit a _job_ to the _scheduler_ that defines the number of compute nodes needed and the length of time the job should run for, also called _wall-time_. Given this information, the schduler pieces together all jobs in an efficient and fair way to run them all.
+A _scheduler_ is used to fairly run applications on a large number of computers that are shared by many users. The user installs their software and data in a space accessible by the worker nodes, then creates a script (BASH or otherwise) that goes through the motions of running the application. Based on the user's needs, they submit a _job_ to the _scheduler_ that defines the number of compute nodes needed and the length of time the job should run for, also called _wall-time_. Given this information, the scheduler pieces together all jobs in an efficient and fair way to run them all.
+
+## Sophia queues
+
+Sophia's queues are unusual in that some allocate by **GPU** and some by **node**. This changes what the `-l select=` number means, so read this carefully:
+
+| Queue | Allocates | `-l select=` means | Limits |
+| -- | -- | -- | -- |
+| `by-gpu` (default) | GPUs within a node | number of GPUs: **1, 2, 4, or 8** | 5 min – 24 hr |
+| `by-node` | whole nodes | number of nodes: **1–8** | 5 min – 24 hr |
+| `bigmem` | the 80 GB-GPU node | 1 node | 5 min – 12 hr (**currently unavailable**) |
+
+- `single-gpu` and `single-node` are **routing** queues that forward to `by-gpu` and `by-node` respectively.
+- Per-project limits: at most 20 jobs queued and 5 jobs running/accruing at a time.
+
+See the current [Sophia queue documentation](https://docs.alcf.anl.gov/sophia/running-jobs/) for the authoritative, up-to-date limits.
 
 ## Running interactively
 
-When you login to the supercomputer, you are given a shell running on one of the few _login nodes_. These are shared with every other user logged into the system at that time, so they are not meant for running compute intensive things. If you would like to build software or make test runs on an actual _worker_ node, please start an interactive session in the following way:
+When you login to the supercomputer, you are given a shell running on one of the few _login nodes_. These are shared with every other user logged into the system at that time, so they are not meant for running compute intensive things (and on Sophia the login nodes have no GPUs). If you would like to build GPU software or make test runs on an actual _worker_ node, please start an interactive session in the following way:
 
 ```bash
-qsub -I -l select=1 -l walltime=00:30:00 -q debug -l filesystems=home:flare -A <project-name>
+qsub -I -l select=1 -l walltime=00:30:00 -q by-gpu -l filesystems=home:eagle -A <project-name>
 ```
 
-Here are the command breakdown:
+Here is the command breakdown:
 * `qsub` is the command to submit jobs to the scheduler
 * `-I` means submit an _interactive_ job
-* `-l select=1` means we want one compute node for this job
-* `-l walltime=00:30:00` means we want our one node for 30 minutes (format = "HOURS:MINUTES:SECONDS" or "DAYS:HOURS:MINUTES:SECONDS")
-* `-q debug` tells the scheduler which _queue_ we would like to use
-* `-l filesystems=home` tells the scheduler that we require our home directory for this job. You can also specify `filesystems=home:flare` if you also need access to `/lus/flare/<project-name>/`.
+* `-l select=1` — in the `by-gpu` queue this requests **1 GPU** (valid: 1, 2, 4, 8). In the `by-node` queue the same `select=1` would request **1 whole node** (8 GPUs).
+* `-l walltime=00:30:00` means we want our allocation for 30 minutes (format = "HOURS:MINUTES:SECONDS" or "DAYS:HOURS:MINUTES:SECONDS")
+* `-q by-gpu` tells the scheduler which _queue_ we would like to use
+* `-l filesystems=home:eagle` tells the scheduler that we require our home directory and the Eagle project filesystem. The job will not start if it touches a filesystem you did not request.
 * `-A <project-name>` specifies the project to which this job will be charged
 
-After your job begins, you will be running a shell on a worker node. The environment can be setup using `module` and some things are already loaded, including the Intel suite of compilers, libraries, and tools. Additional software can be loaded as needed, such as `xpu-smi` to list GPU-related information. You can also open another shell and use `ssh` to login to the node on which were allocated if you need another command line to help debug.
+After your job begins, you will be running a shell on a worker node. The environment can be setup using `module` and some things are already loaded, including NVIDIA tools like `nvidia-smi`. You can also open another shell and use `ssh` to login to the node on which you were allocated if you need another command line to help debug.
 
 Once the walltime has been reached, your shells will automatically logout from the worker node(s).
-
-![polaris_interactive](media/aurora_qsub_interactive.png)
 
 ## Submit your first job
 
@@ -49,29 +63,36 @@ The more standard method for running a job is to submit it to the scheduler via 
 
 First we need to create a job script (example: [examples/00_hello_world.sh](examples/00_hello_world.sh)):
 ```bash
-#!/bin/bash -l
+#!/bin/bash
 #PBS -l select=1
 #PBS -l walltime=00:30:00
-#PBS -q debug
-#PBS -l filesystems=home:flare
+#PBS -q by-node
+#PBS -l filesystems=home:eagle
 #PBS -A <project-name>
 #PBS -o logs/
 #PBS -e logs/
 
-GPUS_PER_NODE=6
+# initialize the module system on the compute node (required in batch scripts on Sophia)
+. /etc/profile
+
+cd ${PBS_O_WORKDIR}
+
+# Sophia has 8 GPUs per node
+GPUS_PER_NODE=8
 
 mpiexec -n $GPUS_PER_NODE -ppn $GPUS_PER_NODE echo Hello World
-
 ```
 
-You'll notice we can use the `#PBS` line prefix at the top of our script to set `qsub` command line options. We can still use the command line to override the options in the script. 
+You'll notice we can use the `#PBS` line prefix at the top of our script to set `qsub` command line options. We can still use the command line to override the options in the script.
 
 > NOTE: here we used `-o logs/` and `-e logs/` which just redirects the STDOUT(`-o`) and the STDERR(`-e`) log files from the job into the `logs/` directory to keep things tidy. The `logs` directory must exist before the job is submitted.
 
-> NOTE: Job scripts must be executable so we need to run `chmod a+x job_script.sh`. This also requires a proper [shebang](https://linuxize.com/post/bash-shebang/) to be set on the first line of our script, e.g. `#!/bin/bash -l`. The `-l` option makes bash act as if it had been invoked as a login shell, which helps to resolve issues with user environments when using different default shells (e.g. `zsh`).
+> NOTE: Job scripts must be executable so we need to run `chmod a+x job_script.sh`. This also requires a proper [shebang](https://linuxize.com/post/bash-shebang/) to be set on the first line of our script, e.g. `#!/bin/bash`.
+
+> NOTE: This example uses `-q by-node` so that `select=1` means one full node (8 GPUs). If you instead use `-q by-gpu`, `select=1` requests a single GPU.
 
 Now submit the job (don't forget to change `<project-name>` in the script):
-```bash -l
+```bash
 qsub job_script.sh
 ```
 
@@ -83,13 +104,7 @@ qstat -u <username>
 ```
 without specifying the `username` we will get a full print out of every job queued and running. This can be overwhelming so using the `username` reduces the output to jobs for just that `username`. Adding `alias qsme='qstat -u <username>'` to your `.bashrc` is a nice shortcut.
 
-![aurora_hello_world](media/aurora_qsub_hello_world.png)
-
-In output from the first instance of `qstat -u <username>` one can see that enough time has passed that the job had already entered the `R` state and was running. 
-
 You can see the PBS Job ID, Submitter's Username, Queue name, Job name (defaults to shell script file name but can be specified via `qsub` options), Session ID, Number of Nodes (NDS), Tasks, Required Memory (we didn't specify), Required Wall-time in hours:minutes, State (R=RUNNING,Q=QUEUED see man-page for more), and Elapsed Time.
-
-In output for the second instance of `qstat -u <username>` we can see that the job has completed and results are available in the stdout log file created.
 
 ## Delete your job
 
@@ -105,11 +120,7 @@ Any job STDOUT or STDERR output will go into two different files that by default
 <script_name>.o<pbs-job-id>
 <script_name>.e<pbs-job-id>
 ```
-In our example submit script, we specify `-o logs/` and `-e logs/` so that the files go into the `logs/` directory. In that case, the output files are named differently:
-```bash
-logs/${PBS_JOBID}.ER
-logs/${PBS_JOBID}.OU
-```
+In our example submit script, we specify `-o logs/` and `-e logs/` so that the files go into the `logs/` directory.
 
 
 # PBS CHEATSHEET
@@ -167,11 +178,11 @@ Your job will have access to these environment variables
 | `PBS_JOBID` |  Job identifier given by PBS when the job is submitted. Created upon execution |
 | `PBS_JOBNAME` |  Job name given by user. Created upon execution |
 | `PBS_NODEFILE` |  The filename containing a list of vnodes assigned to the job. |
-| `PBS_O_WORKDIR` |  Absolute path to directory where qsub is run. Value taken from user’s submission environment.  |
-| `TMPDIR` |  Pathname of job’s scratch directory |
+| `PBS_O_WORKDIR` |  Absolute path to directory where qsub is run. Value taken from user's submission environment.  |
+| `TMPDIR` |  Pathname of job's scratch directory |
 | `NCPUS` |  Number of threads, defaulting to number of CPUs, on the vnode |
 | `PBS_ARRAY_ID` |  Identifier for job arrays. Consists of sequence number. |
 | `PBS_ARRAY_INDEX` |  Index number of subjob in job array. |
-| `PBS_JOBDIR` |  Pathname of job’s staging and execution directory on the primary execution host.  |
+| `PBS_JOBDIR` |  Pathname of job's staging and execution directory on the primary execution host.  |
 
 # [NEXT ->](01_compilers.md)

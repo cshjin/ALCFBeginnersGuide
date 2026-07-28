@@ -1,13 +1,18 @@
-#!/bin/bash 
+#!/bin/bash
 #PBS -l select=2
 #PBS -l walltime=01:00:00
-#PBS -A alcf_training
-#PBS -q aurorabootcamp
+#PBS -A <project-name>
+#PBS -q debug
 #PBS -k doe
-#PBS -l daos=daos_user
-#PBS -l filesystems=flare:home:daos_user
+#PBS -l filesystems=flare:home:daos_user_fs
 
-# qsub -l select=512:ncpus=208 -l walltime=01:00:00 -A alcf_training -l filesystems=flare -q debug  -ldaos=daos_user  ./pbs_script.sh or - I 
+# NOTE (updated 2026-07): the DAOS PBS directive is now the single filesystem token
+# `daos_user_fs` (there is no separate `-l daos=` directive anymore). This example was
+# originally written for an ALCF bootcamp: it used `-q aurorabootcamp -A alcf_training`
+# (an event-only queue/project) and reads its DAOS pool + IOR binary from the
+# alcf_training project space. To run it yourself, set `-A <project-name>` above, and
+# change DAOS_POOL and the ior install paths below to your own project's pool/software.
+# qsub example: qsub -l select=512:ncpus=208 -l walltime=01:00:00 -A <project-name> -l filesystems=flare:daos_user_fs -q prod ./pbs_script.sh   (or add -I for interactive)
 cd ${PBS_O_WORKDIR}
 
 export TZ='/usr/share/zoneinfo/US/Central'

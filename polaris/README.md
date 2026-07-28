@@ -41,11 +41,20 @@ You will be prompted for your password, which is a six digit code generated uniq
 
 ## Quick filesystem breakdown
 
+<!-- OUTDATED (2026-07): home quota was listed as 1TB, and the project filesystem list
+     duplicated Eagle and omitted Flare. Current values verified against
+     https://docs.alcf.anl.gov/data-management/filesystem-and-storage/ (2026-07).
 When you login, you start in your _home_ directory: `/home/<username>/` (1TB default starting quota)
 As an ALCF user you will be assigned access to different allocation _projects_. You can see your projects listed on the [ALCF Accounts Page](accounts.alcf.anl.gov). Each project maps to a user group to control filesystem access, so you can also check your projects using the `groups` command on the terminal. Projects are given storage spaces on our Eagle and/or eagle Lustre filesystems where all members of the project can read/write and share data/software:
 * `/lus/eagle/projects/<project-name>`
 * `/lus/eagle/projects/<project-name>`
 Users should use project spaces for large scale storage and software installations. Increases can be requested via `support@alcf.anl.gov`.
+-->
+When you login, you start in your _home_ directory: `/home/<username>/`. The home file system (`agile-home`, mounted at `/home` or `/lus/agile/home`) has a default quota of **50 GB** and is backed up; it is meant for small files and binaries, not intensive I/O from compute nodes.
+As an ALCF user you will be assigned access to different allocation _projects_. You can see your projects listed on the [ALCF Accounts Page](accounts.alcf.anl.gov). Each project maps to a user group to control filesystem access, so you can also check your projects using the `groups` command on the terminal. Projects are given storage spaces on our **Eagle** and/or **Flare** Lustre filesystems where all members of the project can read/write and share data/software:
+* `/lus/eagle/projects/<project-name>` (also reachable as `/eagle/projects/<project-name>`)
+* `/lus/flare/projects/<project-name>` (also reachable as `/flare/projects/<project-name>`)
+Users should use project spaces for large scale storage and software installations, and for intensive job I/O from compute nodes. Increases can be requested via `support@alcf.anl.gov`.
 
 ## Clone repo:
 
@@ -82,6 +91,10 @@ After doing this, you will find additional modules listed.
 
 Now we can "load modules" which simply executes some simple bash commands to add paths to prebuilt software into our environment variables such as `PATH` and `LD_LIBRARY_PATH`, thus making the software easily available for compilation or use.
 
+<!-- OUTDATED (2026-07): pinned `cudatoolkit-standalone/12.5.0` and `PrgEnv-nvhpc`.
+     Beginning in CPE 24.11 the NVHPC modules (PrgEnv-nvhpc, nvhpc, nvhpc-mixed) were
+     removed in favor of the NVIDIA modules (PrgEnv-nvidia, nvidia, nvidia-mixed).
+     Verified against https://docs.alcf.anl.gov/polaris/compiling-and-linking/ (2026-07).
 ```bash
 module load cudatoolkit-standalone/12.5.0
 ```
@@ -89,6 +102,17 @@ module load cudatoolkit-standalone/12.5.0
 When one first logs in to Polaris, the Nvidia HPC environment is loaded. A more traditional GNU HPC environment is also available and can be loaded by swapping:
 ```bash
 module swap PrgEnv-nvhpc PrgEnv-gnu
+```
+-->
+```bash
+# load the latest CUDA toolkit (omit the version to get the current default)
+module load cudatoolkit-standalone
+```
+
+When one first logs in to Polaris, the NVIDIA HPC environment (`PrgEnv-nvidia`) is loaded by default. A more traditional GNU HPC environment is also available and can be loaded by swapping:
+```bash
+module swap PrgEnv-nvidia PrgEnv-gnu
+module load nvidia-mixed   # keeps the NVIDIA compilers available in your PATH
 ```
 
 

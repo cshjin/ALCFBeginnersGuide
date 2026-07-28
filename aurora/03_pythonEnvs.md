@@ -3,6 +3,7 @@
 ### Users are assumed to know:
 * How to use Python
 * Basic Conda usage
+
 ### Learning Goals:
 * How to add prebuilt Python environments into your environment
 * Loading a Conda module

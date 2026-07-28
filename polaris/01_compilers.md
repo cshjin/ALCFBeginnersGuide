@@ -156,6 +156,10 @@ CC 01_example.cu -o 01_example_cu
 ```
 
 ### Submit script: [`01_example_cu.sh`](examples/01_example_cu.sh)
+<!-- OUTDATED (2026-07): the script body used a bare `/path/to/01_example_cu` with no
+     `cd` into the submission directory and no launcher, so it would not run as shown.
+     Updated to `cd $PBS_O_WORKDIR` + `mpiexec`, matching the MPI example below and the
+     ALCF example job scripts (https://docs.alcf.anl.gov/polaris/running-jobs/example-job-scripts/).
 ```bash
 #!/bin/bash
 #PBS -l select=1
@@ -172,6 +176,27 @@ CC 01_example.cu -o 01_example_cu
 and submit your job:
 ```bash
 qsub -A <project-name> 01_example.sh
+```
+-->
+```bash
+#!/bin/bash
+#PBS -l select=1
+#PBS -l walltime=00:10:00
+#PBS -q debug
+#PBS -l filesystems=home
+#PBS -A <project-name>
+#PBS -o logs/
+#PBS -e logs/
+
+# run from the directory you submitted from, where the compiled binary lives
+cd ${PBS_O_WORKDIR}
+
+mpiexec -n 1 --ppn 1 ./01_example_cu
+```
+
+and submit your job (from the directory containing the script and the compiled `01_example_cu`):
+```bash
+qsub -A <project-name> 01_example_cu.sh
 ```
 
 The output should look like this in the `logs/<jobID>.<hostname>.OU` file:
@@ -323,6 +348,9 @@ CC 01_example_mpi.cu -o 01_example_mpi
 
 Next this bash script can be used to submit a 2 node job with 8 ranks, 4 per node.
 
+<!-- OUTDATED (2026-07): launched the binary via a hardcoded author path
+     (/home/parton/...), which fails for any other user, and had an unterminated
+     `echo "..."`. Updated to `cd $PBS_O_WORKDIR` + a relative binary path.
 ```bash
 #!/bin/bash
 #PBS -l select=2
@@ -343,6 +371,30 @@ echo "NUM_OF_NODES= ${NNODES} TOTAL_NUM_RANKS= ${NTOTRANKS} RANKS_PER_NODE= ${NR
 
 mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --hostfile ${PBS_NODEFILE} /home/parton/ALCFBeginnersGuide/polaris/examples/01_example_mpi
 
+```
+-->
+```bash
+#!/bin/bash
+#PBS -l select=2
+#PBS -l walltime=00:10:00
+#PBS -q debug
+#PBS -l filesystems=home
+#PBS -A <project-name>
+#PBS -o logs/
+#PBS -e logs/
+
+# run from the directory you submitted from, where the compiled binary lives
+cd ${PBS_O_WORKDIR}
+
+# Count number of nodes assigned
+NNODES=`wc -l < $PBS_NODEFILE`
+# set 1 MPI rank per GPU
+NRANKS_PER_NODE=4
+# calculate total ranks
+NTOTRANKS=$(( NNODES * NRANKS_PER_NODE ))
+echo "NUM_OF_NODES= ${NNODES} TOTAL_NUM_RANKS= ${NTOTRANKS} RANKS_PER_NODE= ${NRANKS_PER_NODE}"
+
+mpiexec -n ${NTOTRANKS} --ppn ${NRANKS_PER_NODE} --hostfile ${PBS_NODEFILE} ./01_example_mpi
 ```
 
 ![example_mpi](media/01_compilers_mpi_example.gif)

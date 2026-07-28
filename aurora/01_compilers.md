@@ -173,6 +173,8 @@ NUMA:
 ```
 Looking at the first two NUMA domains, we see that CPU cores 0-51 are in the first socket and CPU cores 52-103 in the second socket. The hyperthreads on each socket are CPU cores 104-155 and 156-207. Additional information on CPU frequencies and cache sizes is also available for those interested.
 
+> **Note (updated 2026-07):** As of a 2025-03-31 system change, the first core of each socket (cores **0** and **52**) is reserved for system/OS use and is not available to user jobs. Keep this in mind when constructing explicit `--cpu-bind=list:...` masks — avoid binding ranks to cores 0 and 52. See the current [Aurora running-jobs documentation](https://docs.alcf.anl.gov/aurora/running-jobs-aurora/) for details.
+
 A bit more detailed information on the NUMA domains is obtained with the `numactl --hardware` command.
 
 ```bash

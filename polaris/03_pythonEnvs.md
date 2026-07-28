@@ -23,7 +23,13 @@ ALCF provides pre-built Python environments using `miniconda`. Within these envi
 
 ## Loading Python Environment
 
+<!-- OUTDATED (2026-07): pinned the specific build `conda/2024-04-29`. The current docs
+     just load the `conda` module (which resolves to the current default build) rather
+     than naming a dated version. Verified against
+     https://docs.alcf.anl.gov/polaris/data-science/python/ (2026-07).
 Remember you can list all the available Conda environments using `module list conda`. As of this writing there is only one, `conda/2024-04-29`. ALCF typically installs an environment every six months including the latest versions of Tensorflow and PyTorch (built from source). The date signifies when it was built.
+-->
+You can see the available Conda module(s) with `module avail conda`. ALCF periodically installs updated `conda` builds that bundle the latest GPU-enabled TensorFlow and PyTorch. Loading `conda` without a version (below) gives you the current default build, so you normally don't need to name a specific dated version.
 
 To load and activate the default environment:
 

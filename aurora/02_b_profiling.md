@@ -12,9 +12,18 @@ Each tool provides different spectrum of profiling features, and simple examples
 * How to run iprof, VTune, Advisor and APS profilers with your applications on Aurora
 * Analyzing results produced on Aurora
 
+> **Note (updated 2026-07):** VTune, Advisor, and APS now ship inside the default
+> `oneapi` module — load them with `module load oneapi` rather than sourcing a
+> `/soft/preview/oneapi-lkg/...` preview path (that path was a temporary pre-release
+> location and is no longer the recommended way). The pasted terminal captures further
+> below are illustrative snapshots and show old pre-release version strings and preview
+> paths; expect newer versions when you run the tools yourself. Verified against
+> <https://docs.alcf.anl.gov/aurora/performance-tools/vtune/> and
+> <https://docs.alcf.anl.gov/aurora/performance-tools/aps/> (2026-07).
+
 ## Common part on Aurora
 Build your application for Aurora, and then submit your job script to Aurora or start an interactive job mode on Aurora as follows:  
-```
+```bash
 $ qsub -I -l select=1 -l walltime=1:00:00 -l filesystems=home -q debug -A <project-name>
 ```
 
@@ -23,7 +32,7 @@ THAPI (Tracing Heterogeneous APIs) is a portable, progrmming model-centric traci
 
 #### Loading THAPI module on Aurora
 Load the THAPI module on Aurora as follows:  
-```
+```bash
 $ module load thapi
 $ iprof --version
 v0.0.11-106-gf3a65b7
@@ -31,11 +40,11 @@ v0.0.11-106-gf3a65b7
 
 #### Instruction to use iprof from the THAPI module 
 Run your application with `iprof` on a single GPU.  
-```
+```bash
 $ iprof ./{your_application} {Command_line_arguments_for_your_application}
 ```
 Run your application with `iprof` on multiple GPU/Nodes.  
-```
+```bash
 $ mpirun -n {Number_of_MPI} -ppn 12 gpu_tile_compact.sh iprof ./{your_application} {Command_line_arguments_for_your_application}
 ```
 
@@ -52,13 +61,22 @@ VTune performs kernel-level analyses such as hpc performance characterization, G
 
 
 
-#### Loading the latest VTune on Aurora
+#### Loading VTune on Aurora
 
-```
+<!-- OUTDATED (2026-07): VTune was loaded by sourcing a /soft/preview/oneapi-lkg/... preview
+     path. VTune now ships in the default `oneapi` module. See
+     https://docs.alcf.anl.gov/aurora/performance-tools/vtune/ (2026-07).
+```bash
 $ source /soft/preview/oneapi-lkg/2025.0.0.885_825/oneapi/vtune/2025.0/env/vars.sh
 $ vtune --version
 Intel(R) VTune(TM) Profiler 2025.0.0 pre-release (build 629072) Command Line Tool
 Copyright (C) 2009 Intel Corporation. All rights reserved.
+```
+-->
+VTune is included in the default `oneapi` module, so no separate install or preview path is needed:
+```bash
+$ module load oneapi
+$ vtune --version
 ```
 
 #### Instruction to use VTune 
@@ -66,7 +84,7 @@ Copyright (C) 2009 Intel Corporation. All rights reserved.
 
 HPC performance characterization analysis (with `-collect hpc-performance`) provide a different aspect of application performance such as high level hardware information, CPU cores utilization, GPU stacks utilization including XVE (Xe Vector Engine) hareware metrics and top offload regions, CPU-side memory metrics, and CPU instruction statics.
 
-```
+```bash
 $ mpirun -n {Number_of_MPI} -ppn 12 gpu_tile_compact.sh vtune -collect hpc-performance -r {result_dir} ./{your_application} {Command_line_arguments_for_your_application}
 ```
 <img src="media/02_b_Vtune_HPC-Perf_01.png" alt="VTune_HPC-perf_01" width="650"/>
@@ -75,7 +93,7 @@ $ mpirun -n {Number_of_MPI} -ppn 12 gpu_tile_compact.sh vtune -collect hpc-perfo
 ##### GPU offload analysis
 GPU offload analysis (with `-collect gpu-offload`) serves studies of an application offload implementation and assesses its efficiency. It traces Level-Zero and OpenCL API functions in oneAPI software stack, detects long latency host functions; shows time spent in data allocation and transfer function as well as kernel device time. 
 
-```
+```bash
 $ mpirun -n {Number_of_MPI} -ppn 12 gpu_tile_compact.sh vtune -collect gpu-offload -r {result_dir} ./{your_application} {Command_line_arguments_for_your_application}
 ```
 <img src="media/02_b_Vtune_Offload_02.png" alt="VTune_Offload_02" width="650"/>
@@ -135,8 +153,9 @@ $ ssh <username>@login.aurora.alcf.anl.gov
 
 Step 3: Start VTune server on an Aurora login node 
 
+<!-- OUTDATED (2026-07): sourced the /soft/preview/oneapi-lkg/... preview path; use `module load oneapi`. -->
 ```
-$ source /soft/preview/oneapi-lkg/2025.0.0.885_825/oneapi/vtune/2025.0/env/vars.sh
+$ module load oneapi
 $ vtune-backend --data-directory=<location of precollected VTune results>
 ```
 Step 4: Open a new terminal with SSH port forwarding enabled
@@ -212,12 +231,22 @@ It captures performance aspects of compute intensive applications such as MPI an
 APS displays key optimization areas and suggests specialized tools for tuning particular performance aspects, such as Intel VTune Profiler and Intel Advisor. The tool is designed to be used on large MPI workloads and can help analyze different scalability issues on Aurora.
 
 
-#### Loading the latest APS on Aurora
+#### Loading APS on Aurora
+
+<!-- OUTDATED (2026-07): APS was loaded by sourcing a /soft/preview/oneapi-lkg/... preview path.
+     APS ships in the default `oneapi` module. See
+     https://docs.alcf.anl.gov/aurora/performance-tools/aps/ (2026-07).
 ```
 $ source /soft/preview/oneapi-lkg/2025.0.0.885_825/oneapi/vtune/2025.0/env/vars.sh
 $ aps --version
 Intel(R) VTune(TM) Profiler 2025.0.0 pre-release (build 629072) Command Line Tool
 Copyright (C) 2009 Intel Corporation. All rights reserved.
+```
+-->
+APS (Application Performance Snapshot) is included in the default `oneapi` module:
+```
+$ module load oneapi
+$ aps --version
 ```
 
 #### Instruction to use APS

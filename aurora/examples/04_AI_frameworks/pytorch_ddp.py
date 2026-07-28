@@ -1,9 +1,17 @@
+# NOTE (updated 2026-07): updated for the current `frameworks` module (frameworks/2025.3.1,
+# Spring 2026). Changes from older frameworks modules:
+#   - `import oneccl_bindings_for_pytorch as torch_ccl` was removed (no longer needed).
+#   - the torch.distributed backend is now 'xccl' (was 'ccl').
+#   - `import intel_extension_for_pytorch as ipex` is deprecated (functionality upstreamed
+#     into PyTorch). It is kept below because ALCF docs advise re-adding it if you see a
+#     performance regression; remove it if you prefer.
+#   - PyTorch-Horovod support was removed from the frameworks module.
+# See https://docs.alcf.anl.gov/aurora/data-science/frameworks/pytorch/
 from mpi4py import MPI
 import os, socket
 import torch
 from torch.nn.parallel import DistributedDataParallel as DDP
-import intel_extension_for_pytorch as ipex
-import oneccl_bindings_for_pytorch as torch_ccl
+import intel_extension_for_pytorch as ipex  # deprecated/optional on current module (see note above)
 
 # DDP: Set environmental variables used by PyTorch
 SIZE = MPI.COMM_WORLD.Get_size()
@@ -17,8 +25,8 @@ os.environ['MASTER_ADDR'] = f"{MASTER_ADDR}.hsn.cm.aurora.alcf.anl.gov"
 os.environ['MASTER_PORT'] = str(2345)
 print(f"DDP: Hi from rank {RANK} of {SIZE} with local rank {LOCAL_RANK}. {MASTER_ADDR}")
 
-# DDP: initialize distributed communication with nccl backend
-torch.distributed.init_process_group(backend='ccl', init_method='env://', rank=int(RANK), world_size=int(SIZE))
+# DDP: initialize distributed communication with the xccl backend
+torch.distributed.init_process_group(backend='xccl', init_method='env://', rank=int(RANK), world_size=int(SIZE))
 
 # DDP: pin GPU to local rank.
 torch.xpu.set_device(int(LOCAL_RANK))

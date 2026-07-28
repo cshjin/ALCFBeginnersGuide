@@ -179,6 +179,13 @@ clean-dfuse.sh ${DAOS_POOL}:${DAOS_CONT}
 
 ## Job Submission
 
+<!-- OUTDATED (2026-07): the DAOS PBS directive was renamed. It used to be requested with
+     `-l filesystems=...:daos_user` plus a separate `-l daos=daos_user`. The current way is a
+     single filesystem token `daos_user_fs` (e.g. `-l filesystems=flare:daos_user_fs`), and the
+     separate `-l daos=` directive is no longer used. The example also used the event-only
+     `-q aurorabootcamp -A alcf_training` (an ALCF bootcamp queue/project) which normal users
+     cannot submit to. Verified against
+     https://docs.alcf.anl.gov/aurora/data-management/daos/daos-overview/ (2026-07).
 Use the following arguments in your `qsub` job submission to ensure that DAOS is accessible on the compute nodes:
 
 - `-l filesystems=daos_user`
@@ -187,6 +194,15 @@ Use the following arguments in your `qsub` job submission to ensure that DAOS is
 Example of an interactive job with DAOS on 2 nodes:
 ```bash
 qsub -l filesystems=home:flare:daos_user -l daos=daos_user -l select=2 -l walltime=00:30:00 -A alcf_training -k doe -q aurorabootcamp -I
+```
+-->
+Use the following argument in your `qsub` job submission to ensure that DAOS is accessible on the compute nodes (add the `daos_user_fs` token to the `-l filesystems=` list):
+
+- `-l filesystems=flare:daos_user_fs`
+
+Example of an interactive job with DAOS on 2 nodes:
+```bash
+qsub -l filesystems=home:flare:daos_user_fs -l select=2 -l walltime=00:30:00 -A <project-name> -k doe -q debug -I
 ```
 
 Use the following arguments in your `mpiexec` command:

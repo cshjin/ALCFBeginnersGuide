@@ -8,11 +8,17 @@ The current plan for Aurora includes weekly maintenance, typically on Mondays. T
 
 ## Scheduling
 
-Similar to other production ALCF systems, Aurora has a tiered scheduling policy ([see queues](https://docs.alcf.anl.gov/aurora/running-jobs-aurora/)) whereby larger jobs can request longer maximum walltimes. To help ensure a positive user experience, users and projects are initially restricted to <=2048 nodes until they can demonstrate successful running of their workloads. We very much want to enable teams to leverage the full system to achieve their science goals.
+Similar to other production ALCF systems, Aurora has a tiered scheduling policy ([see queues](https://docs.alcf.anl.gov/aurora/running-jobs-aurora/)) whereby larger jobs can request longer maximum walltimes. To help ensure a positive user experience, users and projects may initially be restricted to a limited number of nodes until they can demonstrate successful running of their workloads. We very much want to enable teams to leverage the full system to achieve their science goals. See the current [queue policy](https://docs.alcf.anl.gov/aurora/running-jobs-aurora/) for exact node and walltime limits.
 
 ## Storage
 
+<!-- OUTDATED (2026-07): this said cross-mounting other ALCF filesystems was planned
+     "possibly May 2025" — that date is now past. As of this update Aurora still uses a
+     separate home (gecko-home) and project (flare) filesystem. Verified against
+     https://docs.alcf.anl.gov/data-management/filesystem-and-storage/ (2026-07).
 Aurora currently has separate home (Gecko) and project (flare) filesystems today. The plan is to cross-mount the other ALCF filesystems in the near future (possibly May 2025).
+-->
+Aurora has a separate home (`gecko-home`, at `/lus/gecko/home`) and project (`flare`, at `/lus/flare/projects`) filesystem. For the current, authoritative list of which filesystems are mounted on Aurora, see the [filesystem and storage documentation](https://docs.alcf.anl.gov/data-management/filesystem-and-storage/).
 
 ## Checkpointing
 

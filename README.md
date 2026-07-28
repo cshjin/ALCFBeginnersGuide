@@ -12,8 +12,8 @@ We have versions of these steps laid out for each of our systems so please pick 
 
 * [Aurora](aurora/)
 * [Polaris](polaris/)
+* [Sophia](sophia/)
 * [Crux](crux/) [Coming Soon]
-* [Sophia](sophia/) [Coming Soon]
 
 # Our Assumptions
 

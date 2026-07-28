@@ -10,7 +10,9 @@
 
 ## Overview
 
-ALCF supports popular Deep Learning Python libraries (AI Frameworks) on Aurora, such as [PyTorch](https://docs.alcf.anl.gov/aurora/data-science/frameworks/pytorch/) and [TensorFlow](https://docs.alcf.anl.gov/aurora/data-science/frameworks/tensorflow/), which are included in the [`frameworks` module](https://docs.alcf.anl.gov/aurora/data-science/python/#AIML-Framework-Module). 
+ALCF supports popular Deep Learning Python libraries (AI Frameworks) on Aurora, such as 
+- [PyTorch](https://docs.alcf.anl.gov/aurora/data-science/frameworks/pytorch/) and 
+- [TensorFlow](https://docs.alcf.anl.gov/aurora/data-science/frameworks/tensorflow/), which are included in the [`frameworks` module](https://docs.alcf.anl.gov/aurora/data-science/python/#AIML-Framework-Module). 
 
 In this session, we will focus on [PyTorch](https://pytorch.org/), a popular, open-source deep learning framework developed and released by Facebook. 
 Assuming you have developed a PyTorch model on your laptop, we will see how to:
@@ -18,11 +20,22 @@ Assuming you have developed a PyTorch model on your laptop, we will see how to:
 - Train your PyTorch model on a *GPU* on Aurora
 - Train your model *in parallel* on multiple GPUs with PyTorch [Distributed Data Parallel](https://pytorch.org/tutorials/intermediate/ddp_tutorial.html)
 
-
+> **Note (updated 2026-07): important changes in recent `frameworks` modules.** As of the
+> Spring 2026 module (`frameworks/2025.3.1`), several of the patterns shown in this lesson
+> changed. Verify against the current [PyTorch on Aurora docs](https://docs.alcf.anl.gov/aurora/data-science/frameworks/pytorch/):
+> - `import intel_extension_for_pytorch as ipex` is now **deprecated** — its functionality is
+>   being upstreamed into mainline PyTorch. Code below still shows it (ALCF advises re-adding it
+>   only if you see a performance regression), but on the current module you generally no longer
+>   need it.
+> - For distributed training, `import oneccl_bindings_for_pytorch as torch_ccl` is **removed**, and
+>   the `torch.distributed` backend is now **`xccl`** (was `ccl`). See [05_AI_training_at_scale.md](05_AI_training_at_scale.md).
+> - PyTorch **Horovod** support has been removed from the `frameworks` module; use PyTorch DDP.
 
 ## Intel Extension for PyTorch (IPEX)
 
-[Intel Extension for PyTorch (IPEX)](https://pytorch.org/tutorials/recipes/recipes/intel_extension_for_pytorch.html) is an [open-source project](https://github.com/intel/intel-extension-for-pytorch) that extends PyTorch with optimizations for extra performance boost on Intel CPUs and enables the use of Intel GPUs. 
+[Intel Extension for PyTorch (IPEX)](https://pytorch.org/tutorials/recipes/recipes/intel_extension_for_pytorch.html) is an [open-source project](https://github.com/intel/intel-extension-for-pytorch) that extends PyTorch with optimizations for extra performance boost on Intel CPUs and enables the use of Intel GPUs.
+
+> **Note (2026-07):** IPEX is being deprecated as its features move into mainline PyTorch (see the box above). The IPEX-based steps below still work on older modules and remain a useful reference, but on the current `frameworks` module importing `intel_extension_for_pytorch` is optional.
 
 Along with importing the `torch` library, you need to import the `intel_extension_for_pytorch` library in order to detect Intel GPUs as `xpu` devices. 
 
@@ -52,7 +65,7 @@ Along with importing the `torch` library, you need to import the `intel_extensio
    module load frameworks
    ```
 
-1. Then, you can `import` PyTorch in Python as usual (below showing results from the `frameworks/2024.2.1_u1`  module):
+1. Then, you can `import` PyTorch in Python as usual (the output below is illustrative, from the `frameworks/2024.2.1_u1` module; the `frameworks` module is updated roughly quarterly, so `module load frameworks` will give you a newer version and torch build than shown here):
    ```python
    >>> import torch
    >>> torch.__version__
@@ -156,7 +169,7 @@ for epoch in range(10):
 
 From a compute node of an interactive session:
 
-1. Go into the directory `ALCFBeginnersGuide/Aurora-Getting-Started/aurora/examples/04_AI_frameworks/` of this repository, and change permissions to the script [`pytorch_xpu.py`](examples/04_AI_frameworks/pytorch_xpu.py) to make it executable:
+1. Go into the directory `ALCFBeginnersGuide/aurora/examples/04_AI_frameworks/` of this repository, and change permissions to the script [`pytorch_xpu.py`](examples/04_AI_frameworks/pytorch_xpu.py) to make it executable:
    ```bash
    chmod a+x pytorch_xpu.py
    ```
@@ -203,8 +216,9 @@ Here is the code to train the [same dummy PyTorch model](#example-training-a-pyt
 + import os, socket
 import torch
 + from torch.nn.parallel import DistributedDataParallel as DDP
-import intel_extension_for_pytorch as ipex
-+ import oneccl_bindings_for_pytorch as torch_ccl
+import intel_extension_for_pytorch as ipex   # optional/deprecated on frameworks/2025.3.1+
+# NOTE (2026-07): `import oneccl_bindings_for_pytorch as torch_ccl` is no longer needed on the
+# current frameworks module and has been removed here.
 
 # DDP: Set environmental variables used by PyTorch
 + SIZE = MPI.COMM_WORLD.Get_size()
@@ -218,8 +232,8 @@ import intel_extension_for_pytorch as ipex
 + os.environ['MASTER_PORT'] = str(2345)
 + print(f"DDP: Hi from rank {RANK} of {SIZE} with local rank {LOCAL_RANK}. {MASTER_ADDR}")
 
-# DDP: initialize distributed communication with nccl backend
-+ torch.distributed.init_process_group(backend='ccl', init_method='env://', rank=int(RANK), world_size=int(SIZE))
+# DDP: initialize distributed communication with the xccl backend
++ torch.distributed.init_process_group(backend='xccl', init_method='env://', rank=int(RANK), world_size=int(SIZE))
 
 # DDP: pin GPU to local rank.
 + torch.xpu.set_device(int(LOCAL_RANK))
@@ -275,7 +289,7 @@ Here are the steps to run the above code on Aurora:
    ```bash
    qsub -q debug -A <your_project_name> -l select=2,walltime=30:00 -l filesystems=home:flare -k doe -j oe -I
    ```
-1. Go into the directory `ALCFBeginnersGuide/Aurora-Getting-Started/aurora/examples/04_AI_frameworks/` of this repository, and change permissions to the script [`pytorch_ddp.py`](examples/04_AI_frameworks/pytorch_ddp.py) to make it executable with `chmod a+x pytorch_ddp.py`.
+1. Go into the directory `ALCFBeginnersGuide/aurora/examples/04_AI_frameworks/` of this repository, and change permissions to the script [`pytorch_ddp.py`](examples/04_AI_frameworks/pytorch_ddp.py) to make it executable with `chmod a+x pytorch_ddp.py`.
 1. [Load the frameworks module](https://docs.alcf.anl.gov/aurora/data-science/python#aiml-framework-module):
    ```bash
    module load frameworks

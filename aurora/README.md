@@ -56,9 +56,17 @@ You will be prompted for your password, which is a six digit code generated uniq
 
 ## Quick filesystem breakdown
 
+<!-- OUTDATED (2026-07): stated a "1TB" home quota. On Aurora the home quota is 50 GB;
+     1 TB is the default *project* (flare) quota. Verified against
+     https://docs.alcf.anl.gov/aurora/getting-started-on-aurora/ and
+     https://docs.alcf.anl.gov/data-management/filesystem-and-storage/ (2026-07).
 When you login, you start in your _home_ directory: `/home/<username>/` (1TB default starting quota). Note, this home directory is currently specific to Aurora and differs from your _home_ accessible from other ALCF systems (e.g. Polaris). 
 As an ALCF user you will be assigned access to different allocation _projects_. You can see your projects listed on the [ALCF Accounts Page](accounts.alcf.anl.gov). Each project maps to a user group to control filesystem access, so you can also check your projects using the `groups` command on the terminal. Projects are given storage spaces on our Flare Lustre filesystem where all members of the project can read/write and share data/software:
 * `/lus/flare/projects/<project-name>`
+-->
+When you login, you start in your _home_ directory: `/home/<username>/`. The home file system (`gecko-home`, provided from `/lus/gecko/home`) has a default quota of **50 GB** and is meant for small files and binaries, not intensive I/O from compute nodes. Note, this home directory is currently specific to Aurora and differs from your _home_ accessible from other ALCF systems (e.g. Polaris).
+As an ALCF user you will be assigned access to different allocation _projects_. You can see your projects listed on the [ALCF Accounts Page](accounts.alcf.anl.gov). Each project maps to a user group to control filesystem access, so you can also check your projects using the `groups` command on the terminal. Projects are given storage spaces on our Flare Lustre filesystem (default project quota **1 TB**) where all members of the project can read/write and share data/software, and which should be used for intensive job I/O from compute nodes:
+* `/lus/flare/projects/<project-name>` (also reachable as `/flare/projects/<project-name>`)
 
 Users should use project spaces for large scale storage and software installations. Increases can be requested via `support@alcf.anl.gov`.
 
